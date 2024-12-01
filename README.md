@@ -119,7 +119,7 @@ You may also want to run the Vue.js development server, especially if you're usi
 
 # Test User Login Details:
 
-## Email : mkirlin@example.org
+## Email : norene96@example.com
 ## password: password
 
 If your Vue.js components are built as part of the Laravel app, running php artisan serve will serve the full application, including Vue.js assets.
