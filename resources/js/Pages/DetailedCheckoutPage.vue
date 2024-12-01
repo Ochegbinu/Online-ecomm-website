@@ -89,15 +89,24 @@ const removeItem = async (itemId) => {
 // Proceed to checkout
 const checkout = async () => {
     try {
-        const response = await axios.post('/api/checkout', {
-            paymentMethod: paymentMethod.value,
-            billingInfo: billingInfo.value,
-            additionalInfo: additionalInfo.value
-        });
-        window.location.href = response.data.checkoutUrl;
+        const requiredFields = [
+            'fullName', 'email', 'phone', 'address', 
+            'country', 'state', 'city', 'zipCode'
+        ];
+
+        const isAllFieldsFilled = requiredFields.every(field => 
+            billingInfo.value[field] && billingInfo.value[field].trim() !== ''
+        );
+
+        if (!isAllFieldsFilled) {
+            alert('Please fill in all required billing information fields.');
+            return;
+        }
+
+        window.location.href = '/payment-successful';
     } catch (error) {
-        console.error('Error initiating checkout:', error);
-        alert('Failed to proceed to checkout.');
+        console.error('Error during checkout:', error);
+        alert('Failed to proceed to checkout. Please try again.');
     }
 };
 

@@ -47,7 +47,9 @@ Route::get('/api/cart/item-count', [CartController::class, 'getCartItemCount']);
 Route::get('/api/my-cart', [CartController::class, 'getCartItems'])->middleware(\App\Http\Middleware\GuestCartMiddleware::class);
 Route::delete('/api/cart/{productId}', [CartController::class, 'removeFromCart']);
 
-
+Route::get('/payment-successful', function () {
+    return Inertia::render('PaymentSuccessful');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/orders', function () {
