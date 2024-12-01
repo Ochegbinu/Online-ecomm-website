@@ -30,5 +30,9 @@ class Product extends Model
 
         return $this->price;
     }
+
+    protected $with = ['category'];
+
+    
     
 }

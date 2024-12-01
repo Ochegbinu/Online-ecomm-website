@@ -18,15 +18,22 @@ onMounted(async () => {
     } catch (error) {
         console.error("Error fetching products:", error);
     }
-
-    await fetchCartItemCount();  
 });
 
-const filteredProducts = computed(() =>
-    selectedCategories.value.length > 0
-        ? products.value.filter((product) => selectedCategories.value.includes(product.categoryId))
-        : products.value
-);
+// Filtering logic
+const filteredProducts = computed(() => {
+    if (selectedCategories.value.length === 0) {
+        return products.value;
+    }
+    
+    return products.value.filter((product) => 
+        selectedCategories.value.includes(product.category_id)
+    );
+});
+
+const setSelectedCategories = (value) => {
+    selectedCategories.value = value;
+};
 
 // Add product to cart
 const addToCart = async (product) => {
@@ -64,11 +71,7 @@ const fetchCartItemCount = async () => {
     }
 };
 
-// Update selected categories based on the emitted value from CategoryFilter
-const setSelectedCategories = (value) => {
-    selectedCategories.value = value;
-    console.log('Selected Categories:', selectedCategories.value); 
-};
+
 </script>
 
 <template>

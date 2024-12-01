@@ -8,9 +8,18 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    // public function index()
+    // {
+    //     $categories = Category::orderBy('name', 'ASC')->get();
+    //     return response()->json($categories);
+    // }
     public function index()
     {
-        $categories = Category::orderBy('name', 'ASC')->get();
+        // Fetch categories with product count
+        $categories = Category::withCount('products')
+            ->orderBy('name')
+            ->get();
+
         return response()->json($categories);
     }
 

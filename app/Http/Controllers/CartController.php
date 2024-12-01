@@ -68,54 +68,66 @@ class CartController extends Controller
     }
 
 
-    public function getCartItems(Request $request)
-    {
 
-        if (!auth()->check()) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+    public function getCartItems()
+    {
+        if (Auth::check()) {
+            
+            $cart = Cart::where('user_id', Auth::id())
+                ->where('status', 'active')
+                ->with('items.product')
+                ->first();
+
+            $cartItems = $cart ? $cart->items : [];
+        } else {
+            $sessionCart = session()->get('cart', []);
+            
+            $cartItems = [];
+            foreach ($sessionCart as $productId => $item) {
+                $product = Product::find($productId);
+                if ($product) {
+                    $cartItems[] = (object)[
+                        'product_id' => $productId,
+                        'product' => $product,
+                        'quantity' => $item['quantity'],
+                        'price' => $item['price'],
+                        'total_price' => $item['total_price']
+                    ];
+                }
+            }
         }
 
-
-        $cart = Cart::firstOrCreate(
-            ['user_id' => auth()->id(), 'status' => 'active'],
-            ['status' => 'active']
-        );
-
-        $cartItems = CartItem::where('cart_id', $cart->id)
-            ->with(['product', 'product.category'])
-            ->get();
-
         return response()->json([
-            'cartItems' => $cartItems
+            'cartItems' => $cartItems,
+            'total' => array_sum(array_column($cartItems, 'total_price'))
         ]);
     }
 
 
     public function removeFromCart($productId)
     {
-        $cart = Cart::where('user_id', auth()->user()->id)->first();
-    
-        if (!$cart) {
-            return response()->json(['message' => 'Cart not found for the user'], 404);
-        }
-    
-        Log::info('Removing product from cart', ['cart_id' => $cart->id, 'product_id' => $productId]);
-    
-        $cartItem = CartItem::where('cart_id', $cart->id)
-                            ->where('product_id', $productId)
-                            ->first();
-    
-        if ($cartItem) {
-            $cartItem->delete();
-    
-            return response()->json(['message' => 'Product removed from cart']);
-        }
-    
-        // If the product is not found in the cart, return an error
-        return response()->json(['message' => 'Product not found in cart'], 404);
-    }
-    
+        if (Auth::check()) {
 
+            $cart = Cart::where('user_id', Auth::id())
+                ->where('status', 'active')
+                ->first();
+
+            if ($cart) {
+                $cart->items()->where('product_id', $productId)->delete();
+            }
+        } else {
+
+            $cart = session()->get('cart', []);
+            unset($cart[$productId]);
+            session()->put('cart', $cart);
+        }
+
+        return response()->json([
+            'message' => 'Product removed from cart!',
+            'cartItemCount' => $this->getCartItemCount()
+        ]);
+    }
+ 
     public function getCartItemCount()
     {
         if (auth()->check()) {
