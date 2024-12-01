@@ -111,6 +111,7 @@ class CartController extends Controller
             return response()->json(['message' => 'Product removed from cart']);
         }
     
+        // If the product is not found in the cart, return an error
         return response()->json(['message' => 'Product not found in cart'], 404);
     }
     
